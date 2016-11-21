@@ -68,7 +68,7 @@ def fetch_tweets():
     parameters = []
     response = twitter_req(url, "GET", parameters)
 
-    with open('tweets2.txt', 'w') as outFile:
+    with open('tweets4.csv', 'w') as outFile:
         total_tweets = 0
         emoji_tweets = 0
         en_tweets = 0
@@ -87,7 +87,7 @@ def fetch_tweets():
                     text = dict['text'].encode('unicode-escape')
 
                     try:
-                        outFile.write(dict['id_str'] + ',"' + text + '"\n')   # TODO: Enclose text in quotations
+                        outFile.write(dict['id_str'] + ',"' + text + '"\n')
 
                     except Exception as e:
                         print(e)
