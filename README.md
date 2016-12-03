@@ -1,5 +1,9 @@
 # emoji_predictor
 
+#### main.py
+  - To run `python main.py PATH_TO_TWEETS_FILE`
+  
+  
 ####twitter_scraper.py
   - To run `python twitter_scraper.py`
   - Scrapes English tweets with an emoji that are not retweets
