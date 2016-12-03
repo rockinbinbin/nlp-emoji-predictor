@@ -68,7 +68,7 @@ def fetch_tweets():
     parameters = []
     response = twitter_req(url, "GET", parameters)
 
-    with open('tweets4.csv', 'w') as outFile:
+    with open('tweets3.csv', 'w') as outFile:
         total_tweets = 0
         emoji_tweets = 0
         en_tweets = 0
