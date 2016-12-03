@@ -15,8 +15,14 @@ def is_mention(tok):
         return True
     return False
 
-def has_end_emoji(tweet):
+def end_emoji(tweet):
     toks = tweet.split(' ')
+
+    # has emoji at end
+    toks[:]
+    return False, None
+    # is emoji_sequence
+    return True, emoji
 
 
 def main():
@@ -28,7 +34,8 @@ def main():
     with open(args.tweets, 'r') as inFile:
         for line in inFile:
             tweet_id, tweet = line.split(',', 1)
-            if has_end_emoji(tweet):
+            has_end_emoji, emoji = end_emoji(tweet)
+            if has_end_emoji:
                 toks = tweet.split(' ')
 
                 for i in range(len(toks), 0):
