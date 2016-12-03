@@ -7,8 +7,8 @@ def create_emoji_map():
     emoji_map = {}
 
     # from http://www.unicode.org/emoji/charts/emoji-list.html
-    with open('unicode_consortium_emoji_data.html', 'r') as htmlFile:
-        text = htmlFile.read()
+    with open('unicode_consortium_emoji_data.html', 'r') as emojiFile:
+        text = emojiFile.read()
 
     soup = BeautifulSoup(text, "html.parser")
 
@@ -18,7 +18,7 @@ def create_emoji_map():
         if row != soup.find('table').find_all('tr')[0]:
             cols = row.find_all('td')
 
-            unicode = cols[2].string.encode('unicode-escape')
+            unicode = cols[2].string.encode('utf-8')
             name = cols[4].string.encode('unicode-escape')
 
             temp = cols[5].find_all('a')
@@ -27,13 +27,22 @@ def create_emoji_map():
                 tags.append(tag.string.encode('unicode-escape'))
 
             emoji_map[unicode] = {'name': name, 'tags': tags}
-            print(emoji_map)
-            assert 3 == 4
 
     # from http://kt.ijs.si/data/Emoji_sentiment_ranking/
     with open('emoji_sentiment_ranking.html', 'r') as sentimentFile:
-        for row in sentimentFile:
+        text = sentimentFile.read()
+a
+    count = 0
+    soup = BeautifulSoup(text, 'html.parser')
+    for row in soup.find('tbody').find_all('tr'):
+        cols = row.find_all('td')
+        unicode = '\U000' + cols[2].string.split('x')[1]
+        sentiment = cols[8].string.encode('unicode-escape')
 
+        # if is emoji
+        if emoji_map.get(unicode) != None:
+            count += 1
+            emoji_map[unicode]['sentiment'] = sentiment
     return emoji_map
 
 
