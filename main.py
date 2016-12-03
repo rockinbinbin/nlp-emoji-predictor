@@ -3,24 +3,31 @@ import argparse
 from create_emoji_map import create_emoji_map
 
 def is_hashtag(tok):
+    """Returns true if token is a hashtag"""
     if tok[0] == '#':
         return True
     return False
 
 
 def is_hyperlink(tok):
+    """Returns true if token is hyperlink"""
     if 'http' in tok:
         return True
     return False
 
 
 def is_mention(tok):    # TODO: Should mentions be replace by 'mention' instead of being removed?
+    """Returns true if token is mention"""
     if tok[0] == '@':
         return True
     return False
 
 
 def end_emoji(tweet): # TODO: This is so broken
+    """Returns False if there is no emoji at the end of tweet.
+    Returns the first emoji at the end of tweet. If the first emoji is a sequence, returns sequence.
+    If there are no spaces between the emojis at the end of tweet, separates emojis.
+    """
     if '\U000' not in tweet:
         print(tweet)
     else:
@@ -68,10 +75,14 @@ def main():
                 for i in range(len(toks), 0):
                     tok = toks[i]
 
+                    # TODO: Should emojis within body of tweet be eliminated?
+                    # TODO: ie. "Rachel EMOJI is so happy EMOJI"
                     if is_hashtag(tok) or is_hyperlink(tok) or is_mention(tok):
                         toks.remove(tok)
 
     emoji_map = create_emoji_map()
+
+    # TODO: Baseline
 
     # TODO: Keyword Matching
 
