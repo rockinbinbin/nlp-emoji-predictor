@@ -14,13 +14,13 @@ def is_hyperlink(tok):
     return False
 
 
-def is_mention(tok):
+def is_mention(tok):    # TODO: Should mentions be replace by 'mention' instead of being removed?
     if tok[0] == '@':
         return True
     return False
 
 
-def end_emoji(tweet): #TODO: This is so broken
+def end_emoji(tweet): # TODO: This is so broken
     if '\U000' not in tweet:
         print(tweet)
     else:
