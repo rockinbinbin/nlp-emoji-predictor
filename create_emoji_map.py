@@ -7,7 +7,7 @@ def create_emoji_map():
     emoji_map = {}
 
     # from http://www.unicode.org/emoji/charts/emoji-list.html
-    with open('unicode_consortium_emoji_data.html', 'r') as emojiFile:
+    with open('docs/unicode_consortium_emoji_data.html', 'r') as emojiFile:
         text = emojiFile.read()
 
     soup = BeautifulSoup(text, "html.parser")
@@ -29,7 +29,7 @@ def create_emoji_map():
             emoji_map[unicode] = {'name': name, 'tags': tags}
 
     # from http://kt.ijs.si/data/Emoji_sentiment_ranking/
-    with open('emoji_sentiment_ranking.html', 'r') as sentimentFile:
+    with open('docs/emoji_sentiment_ranking.html', 'r') as sentimentFile:
         text = sentimentFile.read()
 
     count = 0
