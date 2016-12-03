@@ -31,7 +31,7 @@ def create_emoji_map():
     # from http://kt.ijs.si/data/Emoji_sentiment_ranking/
     with open('emoji_sentiment_ranking.html', 'r') as sentimentFile:
         text = sentimentFile.read()
-        
+
     count = 0
     soup = BeautifulSoup(text, 'html.parser')
     for row in soup.find('tbody').find_all('tr'):
@@ -43,6 +43,7 @@ def create_emoji_map():
         if emoji_map.get(unicode) != None:
             count += 1
             emoji_map[unicode]['sentiment'] = sentiment
+
     return emoji_map
 
 

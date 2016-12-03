@@ -69,12 +69,7 @@ def fetch_tweets():
     response = twitter_req(url, "GET", parameters)
 
     with open('tweets3.csv', 'w') as outFile:
-        total_tweets = 0
-        emoji_tweets = 0
-        en_tweets = 0
-
         for line in response:
-            total_tweets += 1
             dict = json.loads(line)
 
             # Only English and non-retweet tweets
@@ -94,9 +89,6 @@ def fetch_tweets():
                         print(dict)
                         assert 3 == 4
 
-    print("Total: " + total_tweets)
-    print("Englis: " + en_tweets)
-    print("Emoji: " + emoji_tweets)
 
 if __name__ == '__main__':
   fetch_tweets()
