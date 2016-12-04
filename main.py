@@ -128,10 +128,15 @@ def main():
     # emoji_map = create_emoji_map()
 
     # TODO: Baseline
+    # if keyword, map keyword to emoji
+    # if not, get sentiment of tweet and assign most used emoji for that sentiment
 
     # TODO: Keyword Matching
 
     # TODO: Sentiment Analysis - VADER
+    # return sentiment of tweet
+    # or return diff between tweet sentiment and emoji sentiment
+        # goal is the find the optimal emoji (least amount of difference)
 
     # TODO: WSD
 

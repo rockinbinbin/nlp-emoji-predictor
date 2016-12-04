@@ -1,5 +1,30 @@
 from bs4 import BeautifulSoup
 
+def create_keyword_map():
+    emoji_map = {}
+    # from http://www.unicode.org/emoji/charts/emoji-list.html
+    with open('docs/unicode_consortium_emoji_data.html', 'r') as emojiFile:
+        text = emojiFile.read()
+
+    soup = BeautifulSoup(text, "html.parser")
+
+    for row in soup.find('table').find_all('tr'):
+
+        # skip first row
+        if row != soup.find('table').find_all('tr')[0]:
+            cols = row.find_all('td')
+
+            unicode = cols[2].string.encode('utf-8')
+            name = cols[4].string.encode('unicode-escape')
+
+            temp = cols[5].find_all('a')
+            tags = []
+            for tag in temp:
+                tags.append(tag.string.encode('unicode-escape'))
+            first_tag = tags[0]
+            emoji_map[first_tag] = {'name': name, 'unicode': unicode}
+            # print(emoji_map["face"])
+    return emoji_map
 
 def create_emoji_map():
 
@@ -48,4 +73,5 @@ def create_emoji_map():
 
 
 if __name__ == "__main__":
-    create_emoji_map()
+    # create_emoji_map()
+    # create_keyword_map()
