@@ -81,9 +81,8 @@ def main():
     args = parser.parse_args()
 
     tweet_count = 0
-    set_count = 0
 
-    tweets = []
+    tweets = [] # tweets = [[tweet1, num_hashtags1, num_mentions1], [tweet2, num_hashtags2, num_mentions2]]
     tweet_gold = []
     emoji_count = {}
 
@@ -99,7 +98,6 @@ def main():
             has_end_emoji, emoji = end_emoji(tweet)
 
             if has_end_emoji:
-                set_count += 1
                 toks = tweet.rstrip().split(' ')
 
                 num_mentions = 0
@@ -109,7 +107,7 @@ def main():
                     tok = toks[i]
 
                     if is_hashtag(tok):
-                        num_hashtags += 1
+                        num_hashtags += 1    # TODO: Where to store num_hashtags, num_mentions
                         toks.remove(tok)
                     elif is_mention(tok):
                         num_mentions += 1
@@ -117,7 +115,7 @@ def main():
                     elif is_punctuation(tok) or is_hyperlink(tok) or is_emoji(tok):
                         toks.remove((tok))
 
-                tweets.append(' '.join(toks))
+                tweets.append([' '.join(toks), num_hashtags, num_mentions])
                 tweet_gold.append(emoji)
 
                 if emoji_count.get(emoji):
@@ -141,7 +139,7 @@ def main():
     # TODO: WSD
 
     # print("Tweets with Emojis: " + tweet_count)
-    # print("Tweets with Emojis at End: " + set_count)
+    # print("Tweets with Emojis at End: " + len(tweets))
 
 if __name__ == "__main__":
     main()
