@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 def create_emoji_map():
 
-    # emoji_map[UNICODE] = {'name': NAME, 'tags': [tag0, tag1, tag2...], 'sentiment': SENTIMENT}
+    # emoji_map[UNICODE] = {'name': NAME, 'tags': [TAG0, TAG1, TAG2...], 'sentiment': SENTIMENT}
     emoji_map = {}
 
     # from http://www.unicode.org/emoji/charts/emoji-list.html
@@ -37,7 +37,7 @@ def create_emoji_map():
     for row in soup.find('tbody').find_all('tr'):
         cols = row.find_all('td')
         unicode = '\U000' + cols[2].string.split('x')[1]
-        sentiment = cols[8].string.encode('unicode-escape')
+        sentiment = float(cols[8].string.encode('unicode-escape'))
 
         # if is emoji
         if emoji_map.get(unicode) != None:

@@ -1,4 +1,5 @@
 import argparse
+import re
 
 from create_emoji_map import create_emoji_map
 
@@ -16,40 +17,61 @@ def is_hyperlink(tok):
     return False
 
 
-def is_mention(tok):    # TODO: Should mentions be replace by 'mention' instead of being removed?
+def is_mention(tok):
     """Returns true if token is mention"""
     if tok[0] == '@':
         return True
     return False
 
 
-def end_emoji(tweet): # TODO: This is so broken
+def is_punctuation(tok):
+    """Returns true if token is punctuation"""
+    pattern = re.compile('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )')
+    if pattern.match(tok):
+        return True
+    return False
+
+
+def is_emoji(tok):
+    """Returns true if token is emoji"""
+    if '\U' in tok:
+        return True
+    return False
+
+
+def end_emoji(tweet):
     """Returns False if there is no emoji at the end of tweet.
     Returns the first emoji at the end of tweet. If the first emoji is a sequence, returns sequence.
     If there are no spaces between the emojis at the end of tweet, separates emojis.
     """
-    if '\U000' not in tweet:
-        print(tweet)
+    if '\u' not in tweet:
+        print(tweet + ' has no emoji')
     else:
-        toks = tweet.split(' ')
+        temp = tweet.split(' ')
+        toks = []
+        for tok in temp:
+            if len(tok.split('\u')) > 1:
+                emojis = tok.split('\u')
+                for e in emojis:
+                    if e:
+                        toks.append('\u' + e)
+            else:
+                toks.append(tok)
 
         if is_hyperlink(toks[:]):
             toks.pop()
 
         # has emoji at end?
-        if '\\U000' not in toks[:]:
+        if '\u' not in toks[-1]:
             return False, None
         else:
-            # find first emoji
-            for i in range(len(toks), 0):
-                # space between emojis?
-
-                if '\\U000' in toks[i]:
-                    emoji = toks[:]
+            for i in range(len(toks) - 1, 0, -1):
+                if '\u' in toks[i]:
+                    emoji = toks[i]
                 else:
                     break
+                # TODO: Handle emoji sequences
 
-            # is emoji_sequence?
             return True, emoji
 
 
@@ -61,26 +83,49 @@ def main():
     tweet_count = 0
     set_count = 0
 
+    tweets = []
+    tweet_gold = []
+    emoji_count = {}
+
     with open(args.tweets, 'r') as inFile:
         for line in inFile:
             tweet_count += 1
             tweet_id, tweet = line.split(',', 1)
+            tweet = tweet.rstrip('"\n').lstrip('"')
+
+            # add space before & after each punctuation mark
+            tweet = re.sub('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )', r' ', tweet).lower()
 
             has_end_emoji, emoji = end_emoji(tweet)
 
             if has_end_emoji:
                 set_count += 1
-                toks = tweet.split(' ')
+                toks = tweet.rstrip().split(' ')
+
+                num_mentions = 0
+                num_hashtags = 0
 
                 for i in range(len(toks), 0):
                     tok = toks[i]
 
-                    # TODO: Should emojis within body of tweet be eliminated?
-                    # TODO: ie. "Rachel EMOJI is so happy EMOJI"
-                    if is_hashtag(tok) or is_hyperlink(tok) or is_mention(tok):
+                    if is_hashtag(tok):
+                        num_hashtags += 1
                         toks.remove(tok)
+                    elif is_mention(tok):
+                        num_mentions += 1
+                        toks.remove(tok)
+                    elif is_punctuation(tok) or is_hyperlink(tok) or is_emoji(tok):
+                        toks.remove((tok))
 
-    emoji_map = create_emoji_map()
+                tweets.append(' '.join(toks))
+                tweet_gold.append(emoji)
+
+                if emoji_count.get(emoji):
+                    emoji_count[emoji] += 1
+                else:
+                    emoji_count[emoji] = 1
+
+    # emoji_map = create_emoji_map()
 
     # TODO: Baseline
 
@@ -90,8 +135,8 @@ def main():
 
     # TODO: WSD
 
-    print("Tweets with Emojis: " + tweet_count)
-    print("Tweets with Emojis at End: " + set_count)
+    # print("Tweets with Emojis: " + tweet_count)
+    # print("Tweets with Emojis at End: " + set_count)
 
 if __name__ == "__main__":
     main()
