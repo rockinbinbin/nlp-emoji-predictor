@@ -1,6 +1,6 @@
 import argparse
-
-from create_emoji_map import create_emoji_map
+from vaderSentiment.vaderSentiment import sentiment as vaderSentiment
+# from create_emoji_map import create_emoji_map
 
 def is_hashtag(tok):
     """Returns true if token is a hashtag"""
@@ -22,6 +22,19 @@ def is_mention(tok):    # TODO: Should mentions be replace by 'mention' instead 
         return True
     return False
 
+def findMiddleText(start, end, line):
+    foundWord = ""
+    if line.find(start):
+        startAndword = line[line.find(start):line.rfind(end)]
+        foundWord = startAndword[len(start):]
+        return foundWord
+
+def findMiddletoEndLine(start, line):
+    foundWord = ""
+    if line.find(start):
+        startAndword = line[line.find(start):]
+        foundWord = startAndword[len(start):]
+        return foundWord
 
 def end_emoji(tweet): # TODO: This is so broken
     """Returns False if there is no emoji at the end of tweet.
@@ -52,35 +65,85 @@ def end_emoji(tweet): # TODO: This is so broken
             # is emoji_sequence?
             return True, emoji
 
+def baseline(tweets, emoji_maps):
+    #takes cleaned tweets
+    #appends baseline emoji to end
+    assigned_tweets = []
+    for tweet in tweets:
+        emoji_assigned = False
+        for word in tweet.split():
+            for emoji_map in emoji_maps:
+                tags = emoji_map["tags"]
+                for tag in tags.split():
+                    if word == tag and emoji_assigned == False:
+                        uni = emoji_map["unicode"]
+                        print(uni)
+                        tweet = tweet + uni
+                        assigned_tweets.append(tweet)
+                        emoji_assigned = True
+        if emoji_assigned == False:
+            vs = vaderSentiment(tweet)
+            positive = vs["pos"]
+            negative = vs["neg"]
+            neutral = vs["neu"]
+            compound = vs["compound"]
+            uni = ""
+            if positive > negative:
+                uni = "\U0001f60a"
+            else:
+                uni = "\U0001f622"
+            tweet = tweet + uni
+            assigned_tweets.append(tweet)
+            emoji_assigned = True
+    print(assigned_tweets)
+    return assigned_tweets
+
+def parse_emoji_map():
+    emoji_maps = []
+    emoji_map = {}
+    with open('emoji_map.txt', 'r') as data:
+        for line in data.read().split("\n"):
+            if len(line) > 2:
+                emoji_map["unicode"] = line.split()[1]
+                emoji_map["name"] = findMiddleText("name: ", " sentiment:", line)
+                emoji_map["sentiment"] = findMiddleText("sentiment: ", " tags:", line)
+                emoji_map["tags"] = findMiddletoEndLine("tags: ", line)
+                emoji_maps.append(emoji_map)
+                emoji_map = {}
+    return emoji_maps
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('tweets')
-    args = parser.parse_args()
+    tweets = ["hi i love you", "sad tweet", "this tweet is great", "i like nlp", "happy tweet"]
+    emoji_maps = parse_emoji_map()
+    baseline(tweets, emoji_maps)
 
-    tweet_count = 0
-    set_count = 0
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('tweets')
+    # args = parser.parse_args()
 
-    with open(args.tweets, 'r') as inFile:
-        for line in inFile:
-            tweet_count += 1
-            tweet_id, tweet = line.split(',', 1)
+    # tweet_count = 0
+    # set_count = 0
 
-            has_end_emoji, emoji = end_emoji(tweet)
+    # with open(args.tweets, 'r') as inFile:
+    #     for line in inFile:
+    #         tweet_count += 1
+    #         tweet_id, tweet = line.split(',', 1)
 
-            if has_end_emoji:
-                set_count += 1
-                toks = tweet.split(' ')
+    #         has_end_emoji, emoji = end_emoji(tweet)
 
-                for i in range(len(toks), 0):
-                    tok = toks[i]
+    #         if has_end_emoji:
+    #             set_count += 1
+    #             toks = tweet.split(' ')
 
-                    # TODO: Should emojis within body of tweet be eliminated?
-                    # TODO: ie. "Rachel EMOJI is so happy EMOJI"
-                    if is_hashtag(tok) or is_hyperlink(tok) or is_mention(tok):
-                        toks.remove(tok)
+    #             for i in range(len(toks), 0):
+    #                 tok = toks[i]
 
-    emoji_map = create_emoji_map()
+    #                 # TODO: Should emojis within body of tweet be eliminated?
+    #                 # TODO: ie. "Rachel EMOJI is so happy EMOJI"
+    #                 if is_hashtag(tok) or is_hyperlink(tok) or is_mention(tok):
+    #                     toks.remove(tok)
+
+    # emoji_map = create_emoji_map()
 
     # TODO: Baseline
     # if keyword, map keyword to emoji
@@ -95,8 +158,8 @@ def main():
 
     # TODO: WSD
 
-    print("Tweets with Emojis: " + tweet_count)
-    print("Tweets with Emojis at End: " + set_count)
+    # print("Tweets with Emojis: " + tweet_count)
+    # print("Tweets with Emojis at End: " + set_count)
 
 if __name__ == "__main__":
     main()
