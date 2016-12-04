@@ -1,8 +1,6 @@
 import argparse
 import re
 
-from create_emoji_map import create_emoji_map
-
 def is_hashtag(tok):
     """Returns true if token is a hashtag"""
     if tok[0] == '#':
@@ -46,6 +44,7 @@ def end_emoji(tweet):
     """
     if '\u' not in tweet:
         print(tweet + ' has no emoji')
+        return False, None
     else:
         temp = tweet.split(' ')
         toks = []
@@ -82,9 +81,9 @@ def main():
 
     tweet_count = 0
 
-    tweets = [] # tweets = [[tweet1, num_hashtags1, num_mentions1], [tweet2, num_hashtags2, num_mentions2]]
-    tweet_gold = []
-    emoji_count = {}
+    tweets = []   # tweets = [[tweet1, num_hashtags1, num_mentions1], [tweet2, num_hashtags2, num_mentions2]]
+    tweets_gold = []     # end_emojis for tweets
+    emoji_count = {}    # emoji_count[EMOJI] = number of times emoji is end emoji
 
     with open(args.tweets, 'r') as inFile:
         for line in inFile:
@@ -107,7 +106,7 @@ def main():
                     tok = toks[i]
 
                     if is_hashtag(tok):
-                        num_hashtags += 1    # TODO: Where to store num_hashtags, num_mentions
+                        num_hashtags += 1
                         toks.remove(tok)
                     elif is_mention(tok):
                         num_mentions += 1
@@ -116,14 +115,20 @@ def main():
                         toks.remove((tok))
 
                 tweets.append([' '.join(toks), num_hashtags, num_mentions])
-                tweet_gold.append(emoji)
+                tweets_gold.append(emoji)
 
                 if emoji_count.get(emoji):
                     emoji_count[emoji] += 1
                 else:
                     emoji_count[emoji] = 1
 
-    # emoji_map = create_emoji_map()
+    # split data 4/5 training, 1/5 test
+    num_tweets = len(tweets)
+    num_training = int(num_tweets * 4/float(5))
+    train_tweets = tweets[:num_training]
+    train_gold = tweets_gold[:num_training]
+    test_tweets = tweets[num_training:]
+    test_gold = tweets_gold[num_training:]
 
     # TODO: Baseline
     # if keyword, map keyword to emoji
@@ -139,7 +144,7 @@ def main():
     # TODO: WSD
 
     # print("Tweets with Emojis: " + tweet_count)
-    # print("Tweets with Emojis at End: " + len(tweets))
+    # print("Tweets with Emojis at End: " + num_tweets)
 
 if __name__ == "__main__":
     main()
