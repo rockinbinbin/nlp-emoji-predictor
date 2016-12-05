@@ -1,4 +1,6 @@
 import argparse
+from vaderSentiment.vaderSentiment import sentiment as vaderSentiment
+# from create_emoji_map import create_emoji_map
 import re
 
 def is_hashtag(tok):
@@ -21,6 +23,19 @@ def is_mention(tok):
         return True
     return False
 
+def findMiddleText(start, end, line):
+    foundWord = ""
+    if line.find(start):
+        startAndword = line[line.find(start):line.rfind(end)]
+        foundWord = startAndword[len(start):]
+        return foundWord
+
+def findMiddletoEndLine(start, line):
+    foundWord = ""
+    if line.find(start):
+        startAndword = line[line.find(start):]
+        foundWord = startAndword[len(start):]
+        return foundWord
 
 def is_punctuation(tok):
     """Returns true if token is punctuation"""
@@ -73,11 +88,61 @@ def end_emoji(tweet):
 
             return True, emoji
 
+def baseline(tweets, emoji_maps):
+    #takes cleaned tweets
+    #appends baseline emoji to end
+    assigned_tweets = []
+    for tweet in tweets:
+        emoji_assigned = False
+        for word in tweet.split():
+            for emoji_map in emoji_maps:
+                tags = emoji_map["tags"]
+                for tag in tags.split():
+                    if word == tag and emoji_assigned == False:
+                        uni = emoji_map["unicode"]
+                        print(uni)
+                        tweet = tweet + uni
+                        assigned_tweets.append(tweet)
+                        emoji_assigned = True
+        if emoji_assigned == False:
+            vs = vaderSentiment(tweet)
+            positive = vs["pos"]
+            negative = vs["neg"]
+            neutral = vs["neu"]
+            compound = vs["compound"]
+            uni = ""
+            if positive > negative:
+                uni = "\U0001f60a"
+            else:
+                uni = "\U0001f622"
+            tweet = tweet + uni
+            assigned_tweets.append(tweet)
+            emoji_assigned = True
+    print(assigned_tweets)
+    return assigned_tweets
+
+def parse_emoji_map():
+    emoji_maps = []
+    emoji_map = {}
+    with open('emoji_map.txt', 'r') as data:
+        for line in data.read().split("\n"):
+            if len(line) > 2:
+                emoji_map["unicode"] = line.split()[1]
+                emoji_map["name"] = findMiddleText("name: ", " sentiment:", line)
+                emoji_map["sentiment"] = findMiddleText("sentiment: ", " tags:", line)
+                emoji_map["tags"] = findMiddletoEndLine("tags: ", line)
+                emoji_maps.append(emoji_map)
+                emoji_map = {}
+    return emoji_maps
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('tweets')
-    args = parser.parse_args()
+    tweets = ["hi i love you", "sad tweet", "this tweet is great", "i like nlp", "happy tweet"]
+    emoji_maps = parse_emoji_map()
+    baseline(tweets, emoji_maps)
+
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('tweets')
+    # args = parser.parse_args()
 
     tweet_count = 0
 
@@ -94,7 +159,7 @@ def main():
             # add space before & after each punctuation mark
             tweet = re.sub('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )', r' ', tweet).lower()
 
-            has_end_emoji, emoji = end_emoji(tweet)
+    #         has_end_emoji, emoji = end_emoji(tweet)
 
             if has_end_emoji:
                 toks = tweet.rstrip().split(' ')
@@ -102,17 +167,18 @@ def main():
                 num_mentions = 0
                 num_hashtags = 0
 
-                for i in range(len(toks), 0):
-                    tok = toks[i]
+    #             for i in range(len(toks), 0):
+    #                 tok = toks[i]
 
-                    if is_hashtag(tok):
-                        num_hashtags += 1
-                        toks.remove(tok)
-                    elif is_mention(tok):
-                        num_mentions += 1
-                        toks.remove(tok)
-                    elif is_punctuation(tok) or is_hyperlink(tok) or is_emoji(tok):
-                        toks.remove((tok))
+                # hey rachel, I removed 1 indent here to compile -robin
+                if is_hashtag(tok):
+                    num_hashtags += 1
+                    toks.remove(tok)
+                elif is_mention(tok):
+                    num_mentions += 1
+                    toks.remove(tok)
+                elif is_punctuation(tok) or is_hyperlink(tok) or is_emoji(tok):
+                    toks.remove((tok))
 
                 tweets.append([' '.join(toks), num_hashtags, num_mentions])
                 tweets_gold.append(emoji)

@@ -1,33 +1,8 @@
 from bs4 import BeautifulSoup
-
-def create_keyword_map():
-    emoji_map = {}
-    # from http://www.unicode.org/emoji/charts/emoji-list.html
-    with open('docs/unicode_consortium_emoji_data.html', 'r') as emojiFile:
-        text = emojiFile.read()
-
-    soup = BeautifulSoup(text, "html.parser")
-
-    for row in soup.find('table').find_all('tr'):
-
-        # skip first row
-        if row != soup.find('table').find_all('tr')[0]:
-            cols = row.find_all('td')
-
-            unicode = cols[2].string.encode('utf-8')
-            name = cols[4].string.encode('unicode-escape')
-
-            temp = cols[5].find_all('a')
-            tags = []
-            for tag in temp:
-                tags.append(tag.string.encode('unicode-escape'))
-            first_tag = tags[0]
-            emoji_map[first_tag] = {'name': name, 'unicode': unicode}
-            # print(emoji_map["face"])
-    return emoji_map
+#run python create_emoji_map.py once to create text files – don't call directly from project.
+#writes to "emoji_map.txt" a map for unicode, name, sentiment, and tags
 
 def create_emoji_map():
-
     # emoji_map[UNICODE] = {'name': NAME, 'tags': [TAG0, TAG1, TAG2...], 'sentiment': SENTIMENT}
     emoji_map = {}
 
@@ -68,10 +43,33 @@ def create_emoji_map():
         if emoji_map.get(unicode) != None:
             count += 1
             emoji_map[unicode]['sentiment'] = sentiment
-
     return emoji_map
 
+def write_emoji_map_to_file(emoji_map):
+    outFile = open("emoji_map.txt", 'w')
+    for uni in emoji_map:
+        value = emoji_map[uni]
+
+        outFile.write("unicode: ")
+        outFile.write(uni)
+        outFile.write(" ")
+        if "name" in value:
+            outFile.write("name: ")
+            outFile.write(value["name"])
+            outFile.write(" ")
+
+        if "sentiment" in value:
+            outFile.write("sentiment: ")
+            outFile.write(value["sentiment"])
+            outFile.write(" ")
+
+        if "tags" in value:
+            outFile.write("tags: ")
+            for tag in value["tags"]:
+                outFile.write(tag)
+                outFile.write(" ")
+        outFile.write("\n")
 
 if __name__ == "__main__":
-    # create_emoji_map()
-    # create_keyword_map()
+    emoji_map = create_emoji_map()
+    write_emoji_map_to_file(emoji_map)
