@@ -1,4 +1,5 @@
 import argparse
+from vaderSentiment import sentiment as vaderSentiment 
 
 from create_emoji_map import create_emoji_map
 
@@ -52,6 +53,26 @@ def end_emoji(tweet): # TODO: This is so broken
             # is emoji_sequence?
             return True, emoji
 
+def sentiment_analysis(all_tweets):
+
+    sentiments = {}
+    sentiment_list = []
+    count = 0
+
+    for tweet in all_tweets:
+        print tweet
+        vt = vaderSentiment(tweet)
+        print str(vt)
+
+        for key,value in vt:
+            if key != "compound":
+                sentiment_list.append(value)
+
+
+
+
+
+    emoji_map[UNICODE] = {'name': NAME, 'tags': [tag0, tag1, tag2...], 'sentiment': SENTIMENT}
 
 def main():
     parser = argparse.ArgumentParser()
@@ -88,6 +109,7 @@ def main():
 
     # TODO: Keyword Matching
 
+    # sentiment_scores = sentiment_analysis(all_tweets)
     # TODO: Sentiment Analysis - VADER
     # return sentiment of tweet
     # or return diff between tweet sentiment and emoji sentiment
