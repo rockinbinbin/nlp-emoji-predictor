@@ -125,8 +125,10 @@ def main():
     # split data 4/5 training, 1/5 test
     num_tweets = len(tweets)
     num_training = int(num_tweets * 4/float(5))
+
     train_tweets = tweets[:num_training]
     train_gold = tweets_gold[:num_training]
+
     test_tweets = tweets[num_training:]
     test_gold = tweets_gold[num_training:]
 
