@@ -1,7 +1,7 @@
 import argparse
-from vaderSentiment import sentiment as vaderSentiment 
-
 from create_emoji_map import create_emoji_map
+from vaderSentiment.vaderSentiment import sentiment as vaderSentiment
+import re
 
 def is_hashtag(tok):
     """Returns true if token is a hashtag"""
@@ -17,91 +17,219 @@ def is_hyperlink(tok):
     return False
 
 
-def is_mention(tok):    # TODO: Should mentions be replace by 'mention' instead of being removed?
+def is_mention(tok):
     """Returns true if token is mention"""
     if tok[0] == '@':
         return True
     return False
 
+def findMiddleText(start, end, line):
+    foundWord = ""
+    if line.find(start):
+        startAndword = line[line.find(start):line.rfind(end)]
+        foundWord = startAndword[len(start):]
+        return foundWord
 
-def end_emoji(tweet): # TODO: This is so broken
+def findMiddletoEndLine(start, line):
+    foundWord = ""
+    if line.find(start):
+        startAndword = line[line.find(start):]
+        foundWord = startAndword[len(start):]
+        return foundWord
+
+def is_punctuation(tok):
+    """Returns true if token is punctuation"""
+    pattern = re.compile('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )')
+    if pattern.match(tok):
+        return True
+    return False
+
+
+def is_emoji(tok):
+    """Returns true if token is emoji"""
+    if '\U' in tok:
+        return True
+    return False
+
+
+def end_emoji(tweet):
     """Returns False if there is no emoji at the end of tweet.
     Returns the first emoji at the end of tweet. If the first emoji is a sequence, returns sequence.
     If there are no spaces between the emojis at the end of tweet, separates emojis.
     """
-    if '\U000' not in tweet:
-        print(tweet)
+    if '\u' not in tweet:
+        print(tweet + ' has no emoji')
+        return False, None
     else:
-        toks = tweet.split(' ')
+        temp = tweet.split(' ')
+        toks = []
+        for tok in temp:
+            if len(tok.split('\u')) > 1:
+                emojis = tok.split('\u')
+                for e in emojis:
+                    if e:
+                        toks.append('\u' + e)
+            else:
+                toks.append(tok)
 
         if is_hyperlink(toks[:]):
             toks.pop()
 
         # has emoji at end?
-        if '\\U000' not in toks[:]:
+        if '\u' not in toks[-1]:
             return False, None
         else:
-            # find first emoji
-            for i in range(len(toks), 0):
-                # space between emojis?
-
-                if '\\U000' in toks[i]:
-                    emoji = toks[:]
+            for i in range(len(toks) - 1, 0, -1):
+                if '\u' in toks[i]:
+                    emoji = toks[i]
                 else:
                     break
+                # TODO: Handle emoji sequences
 
-            # is emoji_sequence?
             return True, emoji
+
+def baseline(tweets, emoji_maps):
+    #takes cleaned tweets
+    #appends baseline emoji to end
+    assigned_tweets = []
+    for tweet in tweets:
+        emoji_assigned = False
+        for word in tweet.split():
+            for emoji_map in emoji_maps:
+                tags = emoji_map["tags"]
+                for tag in tags.split():
+                    if word == tag and emoji_assigned == False:
+                        uni = emoji_map["unicode"]
+                        print(uni)
+                        tweet = tweet + uni
+                        assigned_tweets.append(tweet)
+                        emoji_assigned = True
+        if emoji_assigned == False:
+            vs = vaderSentiment(tweet)
+            positive = vs["pos"]
+            negative = vs["neg"]
+            neutral = vs["neu"]
+            compound = vs["compound"]
+            uni = ""
+            if positive > negative:
+                uni = "\U0001f60a"
+            else:
+                uni = "\U0001f622"
+            tweet = tweet + uni
+            assigned_tweets.append(tweet)
+            emoji_assigned = True
+    print(assigned_tweets)
+    return assigned_tweets
+
+def parse_emoji_map():
+    emoji_maps = []
+    emoji_map = {}
+    with open('emoji_map.txt', 'r') as data:
+        for line in data.read().split("\n"):
+            if len(line) > 2:
+                emoji_map["unicode"] = line.split()[1]
+                emoji_map["name"] = findMiddleText("name: ", " sentiment:", line)
+                emoji_map["sentiment"] = findMiddleText("sentiment: ", " tags:", line)
+                emoji_map["tags"] = findMiddletoEndLine("tags: ", line)
+                emoji_maps.append(emoji_map)
+                emoji_map = {}
+    return emoji_maps
 
 def sentiment_analysis(all_tweets):
 
     sentiments = {}
-    sentiment_list = []
     count = 0
 
     for tweet in all_tweets:
-        print tweet
-        vt = vaderSentiment(tweet)
-        print str(vt)
+        vs = vaderSentiment(tweet)
 
-        for key,value in vt:
-            if key != "compound":
-                sentiment_list.append(value)
+        pos = vs["pos"]
+        neg = vs["neg"]
+        neu = vs["neu"]
 
+        # find highest scoring sentiment
+        highest = max(pos, neg, neu)
 
+        if highest == pos:
+            sentiments[count] = highest
+        elif highest == neg:
+            # negate value and then add to dict
+            highest *= -1
+            sentiments[count] = highest
+        else:
+            # neutral value = 0.0 and add to dict
+            highest = 0.0
+            sentiments[count] = highest
 
+        count += 1
 
-
-    emoji_map[UNICODE] = {'name': NAME, 'tags': [tag0, tag1, tag2...], 'sentiment': SENTIMENT}
+    return sentiments
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('tweets')
-    args = parser.parse_args()
+    tweets_ex = ["hi i love you", "sad tweet", "this tweet is great", "i like nlp", "happy tweet"]
+    emoji_maps = parse_emoji_map()
+    baseline(tweets, emoji_maps)
+    sentiments = sentiment_analysis(tweets_ex)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('tweets')
+    # args = parser.parse_args()
 
     tweet_count = 0
-    set_count = 0
+
+    all_tweets = [] # for sentiment analysis and baseline
+    tweets = []   # tweets = [[tweet1, num_hashtags1, num_mentions1], [tweet2, num_hashtags2, num_mentions2]]
+    tweets_gold = []     # end_emojis for tweets
+    emoji_count = {}    # emoji_count[EMOJI] = number of times emoji is end emoji
 
     with open(args.tweets, 'r') as inFile:
         for line in inFile:
             tweet_count += 1
             tweet_id, tweet = line.split(',', 1)
+            tweet = tweet.rstrip('"\n').lstrip('"')
 
-            has_end_emoji, emoji = end_emoji(tweet)
+            # add space before & after each punctuation mark
+            tweet = re.sub('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )', r' ', tweet).lower()
+
+    #         has_end_emoji, emoji = end_emoji(tweet)
 
             if has_end_emoji:
-                set_count += 1
-                toks = tweet.split(' ')
+                toks = tweet.rstrip().split(' ')
 
-                for i in range(len(toks), 0):
-                    tok = toks[i]
+                num_mentions = 0
+                num_hashtags = 0
 
-                    # TODO: Should emojis within body of tweet be eliminated?
-                    # TODO: ie. "Rachel EMOJI is so happy EMOJI"
-                    if is_hashtag(tok) or is_hyperlink(tok) or is_mention(tok):
-                        toks.remove(tok)
+    #             for i in range(len(toks), 0):
+    #                 tok = toks[i]
 
-    emoji_map = create_emoji_map()
+                # hey rachel, I removed 1 indent here to compile -robin
+                if is_hashtag(tok):
+                    num_hashtags += 1
+                    toks.remove(tok)
+                elif is_mention(tok):
+                    num_mentions += 1
+                    toks.remove(tok)
+                elif is_punctuation(tok) or is_hyperlink(tok) or is_emoji(tok):
+                    toks.remove((tok))
+
+                tweets.append([' '.join(toks), num_hashtags, num_mentions])
+                all_tweets.append(' '.join(toks))
+
+                tweets_gold.append(emoji)
+
+                if emoji_count.get(emoji):
+                    emoji_count[emoji] += 1
+                else:
+                    emoji_count[emoji] = 1
+
+    # split data 4/5 training, 1/5 test
+    num_tweets = len(tweets)
+    num_training = int(num_tweets * 4/float(5))
+
+    train_tweets = tweets[:num_training]
+    train_gold = tweets_gold[:num_training]
+
+    test_tweets = tweets[num_training:]
+    test_gold = tweets_gold[num_training:]
 
     # TODO: Baseline
     # if keyword, map keyword to emoji
@@ -117,8 +245,8 @@ def main():
 
     # TODO: WSD
 
-    print("Tweets with Emojis: " + tweet_count)
-    print("Tweets with Emojis at End: " + set_count)
+    # print("Tweets with Emojis: " + tweet_count)
+    # print("Tweets with Emojis at End: " + num_tweets)
 
 if __name__ == "__main__":
     main()
