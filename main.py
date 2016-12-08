@@ -22,8 +22,9 @@ def findMiddletoEndLine(start, line):
         return foundWord
 
 
+# TODO
 def keyword_matching():
-    """Returns list of len(num_emojis) which indicates whether a """
+    """Returns list of len(num_emojis) which indicates whether tweet has a keyword for each emoji """
 
 
 def baseline(tweets, emoji_maps):
