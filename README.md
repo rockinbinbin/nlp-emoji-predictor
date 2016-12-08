@@ -17,7 +17,7 @@ To install requirements: `pip install -r requirement.txt`
  
 
 ####Scraping Unicode Consortium & Emoji Sentiment Ranking
-  - To run: `python create_emoji_map.py'
+  - To run: `python create_emoji_map.py`
   - Write a dictionary of emojis and their unicode, name, tags, and sentiment to "emoji_map.txt"
   - emoji_map[UNICODE] = {'name': NAME, 'tags': [tag0, tag1, tag2...], 'sentiment': SENTIMENT}
   - Emoji unicode, names, and tags from [Unicode Consortium](http://www.unicode.org/emoji/charts/emoji-list.html)
