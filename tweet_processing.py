@@ -71,3 +71,41 @@ def end_emoji(tweet):
                 # TODO: Handle emoji sequences
 
             return True, emoji
+
+
+def process_tweet(line, tweets, tweets_gold, emoji_count):
+    tweet_id, tweet = line.split(',', 1)
+    tweet = tweet.rstrip('"\n').lstrip('"')
+
+    # add space before & after each punctuation mark
+    tweet = re.sub('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )', r' ', tweet).lower()
+
+    has_end_emoji, emoji = end_emoji(tweet)
+
+    if has_end_emoji:
+        toks = tweet.rstrip().split(' ')
+
+        num_mentions = 0
+        num_hashtags = 0
+
+        for i in range(len(toks), 0):
+            tok = toks[i]
+
+            if is_hashtag(tok):
+                num_hashtags += 1
+                toks.remove(tok)
+            elif is_mention(tok):
+                num_mentions += 1
+                toks.remove(tok)
+            elif is_punctuation(tok) or is_hyperlink(tok) or is_emoji(tok):
+                toks.remove((tok))
+
+        tweets.append([' '.join(toks), num_hashtags, num_mentions])
+
+        tweets_gold.append(emoji)
+
+        if emoji_count.get(emoji):
+            emoji_count[emoji] += 1
+        else:
+            emoji_count[emoji] = 1
+     return

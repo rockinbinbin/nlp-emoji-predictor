@@ -22,6 +22,10 @@ def findMiddletoEndLine(start, line):
         return foundWord
 
 
+def keyword_matching():
+    """Returns list of len(num_emojis) which indicates whether a """
+
+
 def baseline(tweets, emoji_maps):
     """Takes cleaned tweets. Returns list of baseline predictions"""
     assigned_emojis = list()
@@ -50,10 +54,9 @@ def baseline(tweets, emoji_maps):
             negative = vs["neg"]
             neutral = vs["neu"]
             compound = vs["compound"]
-            uni = ""
 
             if positive > negative:
-                uni = "\u0001f60a"
+                uni = "\u0001f60a"  # TODO: How were these emojis picked?
             else:
                 uni = "\u0001f622"
 
@@ -114,40 +117,7 @@ def main():
     with open(args.tweets, 'r') as inFile:
         for line in inFile:
             tweet_count += 1
-            tweet_id, tweet = line.split(',', 1)
-            tweet = tweet.rstrip('"\n').lstrip('"')
-
-            # add space before & after each punctuation mark
-            tweet = re.sub('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )', r' ', tweet).lower()
-
-            has_end_emoji, emoji = end_emoji(tweet)
-
-            if has_end_emoji:
-                toks = tweet.rstrip().split(' ')
-
-                num_mentions = 0
-                num_hashtags = 0
-
-                for i in range(len(toks), 0):
-                    tok = toks[i]
-
-                    if is_hashtag(tok):
-                        num_hashtags += 1
-                        toks.remove(tok)
-                    elif is_mention(tok):
-                        num_mentions += 1
-                        toks.remove(tok)
-                    elif is_punctuation(tok) or is_hyperlink(tok) or is_emoji(tok):
-                        toks.remove((tok))
-
-                tweets.append([' '.join(toks), num_hashtags, num_mentions])
-
-                tweets_gold.append(emoji)
-
-                if emoji_count.get(emoji):
-                    emoji_count[emoji] += 1
-                else:
-                    emoji_count[emoji] = 1
+            process_tweet(line, tweets, tweets_gold, emoji_count)
 
     # split data 4/5 training, 1/5 test
     num_tweets = len(tweets)
@@ -159,7 +129,7 @@ def main():
     test_tweets = tweets[num_training:]
     test_gold = tweets_gold[num_training:]
 
-    # Create feature vectors
+    # create feature vectors
     train_fv = list()
     test_fv = list()
 
@@ -194,12 +164,10 @@ def main():
         if base_predictions[i].lower() == test_gold[i].lower():
             base_correct += 1
 
-    print(base_predictions)
-    assert 3 == 4
     base_accuracy = base_correct / float(len(test_tweets))
     print("Baseline Accuracy: " + base_accuracy)
 
-    # TODO: Evaluate accuracy of predictions
+    # TODO: evaluate accuracy of decision tree predictions
 
     # print("Tweets with Emojis: " + tweet_count)
     # print("Tweets with Emojis at End: " + num_tweets)
