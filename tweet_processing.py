@@ -68,12 +68,17 @@ def end_emoji(tweet):
                     emoji = toks[i]
                 else:
                     break
-                # TODO: Handle emoji sequences
+                # TODO: handle flags
 
             return True, emoji
 
 
 def process_tweet(line, tweets, tweets_gold, emoji_count):
+    """Returns nothing.
+    Appends cleaned tweet, num_hashtags, and num_mentions to tweets.
+    Appends the end emoji to tweets_gold.
+    Updates the emoji_count dictionary."""
+
     tweet_id, tweet = line.split(',', 1)
     tweet = tweet.rstrip('"\n').lstrip('"')
 
@@ -83,7 +88,7 @@ def process_tweet(line, tweets, tweets_gold, emoji_count):
     has_end_emoji, emoji = end_emoji(tweet)
 
     if has_end_emoji:
-        toks = tweet.rstrip().split(' ')
+        toks = tweet.rstrip().split(' ').lower()
 
         num_mentions = 0
         num_hashtags = 0

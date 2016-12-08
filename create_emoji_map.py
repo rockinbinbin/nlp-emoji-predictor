@@ -19,15 +19,17 @@ def create_emoji_map():
         if row != soup.find('table').find_all('tr')[0]:
             cols = row.find_all('td')
 
-            unicode = cols[2].string.encode('utf-8')    # TODO: Fix emoji sequences
-            name = cols[4].string.encode('unicode-escape')
+            unicode = cols[2].string.encode('utf-8').lower()
+            # TODO: include flags
+            if unicode.count('u') == 1:    # exclude emoji sequences
+                name = cols[4].string.encode('unicode-escape')
 
-            temp = cols[5].find_all('a')
-            tags = []
-            for tag in temp:
-                tags.append(tag.string.encode('unicode-escape'))
+                temp = cols[5].find_all('a')
+                tags = []
+                for tag in temp:
+                    tags.append(tag.string.encode('unicode-escape'))
 
-            emoji_map[unicode] = {'name': name, 'tags': tags}
+                emoji_map[unicode] = {'name': name, 'tags': tags}
 
     # from http://kt.ijs.si/data/Emoji_sentiment_ranking/
     with open('docs/emoji_sentiment_ranking.html', 'r') as sentimentFile:

@@ -68,7 +68,7 @@ def fetch_tweets():
     parameters = []
     response = twitter_req(url, "GET", parameters)
 
-    with open('tweets3.csv', 'w') as outFile:
+    with open('tweets2.csv', 'w') as outFile:
         for line in response:
             dict = json.loads(line)
 
