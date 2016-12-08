@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
-#run python create_emoji_map.py once to create text files – don't call directly from project.
-#writes to "emoji_map.txt" a map for unicode, name, sentiment, and tags
+
+"""Run python create_emoji_map.py once to create text files.
+Writes to "emoji_map.txt" a map for unicode, name, sentiment, and tags."""
 
 def create_emoji_map():
     # emoji_map[UNICODE] = {'name': NAME, 'tags': [TAG0, TAG1, TAG2...], 'sentiment': SENTIMENT}
@@ -18,7 +19,7 @@ def create_emoji_map():
         if row != soup.find('table').find_all('tr')[0]:
             cols = row.find_all('td')
 
-            unicode = cols[2].string.encode('utf-8')
+            unicode = cols[2].string.encode('utf-8')    # TODO: Fix emoji sequences
             name = cols[4].string.encode('unicode-escape')
 
             temp = cols[5].find_all('a')

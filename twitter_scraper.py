@@ -74,11 +74,9 @@ def fetch_tweets():
 
             # Only English and non-retweet tweets
             if dict.get('lang') == 'en' and dict.get('retweeted_status') is None:
-                en_tweets += 1
 
                 # Has emoji
                 if has_emoji(dict['text']):
-                    emoji_tweets += 1
                     text = dict['text'].encode('unicode-escape')
 
                     try:
