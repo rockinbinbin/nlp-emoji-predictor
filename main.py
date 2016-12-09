@@ -153,33 +153,33 @@ def main():
 
 
     # train decision tree
-    clf = DecisionTreeClassifier()
-    clf = clf.fit(train_fv, train_gold)
-
-    # make predictions
-    predictions = clf.predict(test_fv)
-
-    # baseline
-    base_predictions = baseline([tweet[0] for tweet in test_tweets], emoji_maps)
-
-    # evaluate accuracy of baseline
-    assert len(base_predictions) == len(test_gold)
-    assert len(predictions) == len(test_gold)
-
-    base_correct = 0
-    pred_correct = 0
-
-    for i in range(0, len(test_tweets)):
-        if base_predictions[i].lower() == test_gold[i].lower():
-            base_correct += 1
-        if predictions[i].lower() == test_gold[i].lower():
-            pred_correct += 1
-
-    base_accuracy = base_correct / float(len(test_tweets))
-    pred_accuracy = pred_correct / float(len(test_tweets))
-
-    print("Baseline Accuracy: " + base_accuracy)
-    print("Prediction Accuracy: " + pred_accuracy)
+    # clf = DecisionTreeClassifier()
+    # clf = clf.fit(train_fv, train_gold)
+    #
+    # # make predictions
+    # predictions = clf.predict(test_fv)
+    #
+    # # baseline
+    # base_predictions = baseline([tweet[0] for tweet in test_tweets], emoji_maps)
+    #
+    # # evaluate accuracy of baseline
+    # assert len(base_predictions) == len(test_gold)
+    # assert len(predictions) == len(test_gold)
+    #
+    # base_correct = 0
+    # pred_correct = 0
+    # 
+    # for i in range(0, len(test_tweets)):
+    #     if base_predictions[i].lower() == test_gold[i].lower():
+    #         base_correct += 1
+    #     if predictions[i].lower() == test_gold[i].lower():
+    #         pred_correct += 1
+    #
+    # base_accuracy = base_correct / float(len(test_tweets))
+    # pred_accuracy = pred_correct / float(len(test_tweets))
+    #
+    # print("Baseline Accuracy: " + str(base_accuracy))
+    # print("Prediction Accuracy: " + str(pred_accuracy))
 
 if __name__ == "__main__":
     main()

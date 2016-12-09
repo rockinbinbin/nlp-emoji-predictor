@@ -70,7 +70,7 @@ def end_emoji(tweet):
                     break
                 # TODO: handle flags
 
-            return True, emoji
+            return True, emoji.lower()
 
 
 def process_tweet(line, tweets, tweets_gold, emoji_count):
@@ -81,14 +81,15 @@ def process_tweet(line, tweets, tweets_gold, emoji_count):
 
     tweet_id, tweet = line.split(',', 1)
     tweet = tweet.rstrip('"\n').lstrip('"')
+    print(tweet)
 
     # add space before & after each punctuation mark
-    tweet = re.sub('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )', r' ', tweet).lower()
+    tweet = re.sub('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )', r' ', tweet)
 
     has_end_emoji, emoji = end_emoji(tweet)
 
     if has_end_emoji:
-        toks = tweet.rstrip().split(' ').lower()
+        toks = tweet.rstrip().split(' ')
 
         num_mentions = 0
         num_hashtags = 0
@@ -102,7 +103,7 @@ def process_tweet(line, tweets, tweets_gold, emoji_count):
             elif is_mention(tok):
                 num_mentions += 1
                 toks.remove(tok)
-            elif is_punctuation(tok) or is_hyperlink(tok) or is_emoji(tok):
+            elif is_hyperlink(tok) or is_emoji(tok):
                 toks.remove((tok))
 
         tweets.append([' '.join(toks), num_hashtags, num_mentions])
@@ -113,4 +114,3 @@ def process_tweet(line, tweets, tweets_gold, emoji_count):
             emoji_count[emoji] += 1
         else:
             emoji_count[emoji] = 1
-     return
