@@ -81,7 +81,6 @@ def process_tweet(line, tweets, tweets_gold, emoji_count):
 
     tweet_id, tweet = line.split(',', 1)
     tweet = tweet.rstrip('"\n').lstrip('"')
-    print(tweet)
 
     # add space before & after each punctuation mark
     tweet = re.sub('(?<! )(?=[.,!?()])|(?<=[.,!?()])(?! )', r' ', tweet)

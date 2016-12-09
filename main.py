@@ -125,8 +125,8 @@ def main():
     num_tweets = len(tweets)
     num_training = int(num_tweets * 4/float(5))
 
-    print("Tweets with Emojis: " + tweet_count)
-    print("Tweets with Emojis at End: " + num_tweets)
+    print("Tweets with Emojis: " + str(tweet_count))
+    print("Tweets with Emojis at End: " + str(num_tweets))
 
     train_tweets = tweets[:num_training]
     train_gold = tweets_gold[:num_training]
@@ -168,7 +168,7 @@ def main():
     #
     # base_correct = 0
     # pred_correct = 0
-    # 
+    #
     # for i in range(0, len(test_tweets)):
     #     if base_predictions[i].lower() == test_gold[i].lower():
     #         base_correct += 1
