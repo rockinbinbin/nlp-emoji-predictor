@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
-#run python create_emoji_map.py once to create text files – don't call directly from project.
-#writes to "emoji_map.txt" a map for unicode, name, sentiment, and tags
+# run python create_emoji_map.py once to create text files – don't call directly from project.
+# writes to "emoji_map.txt" a map for unicode, name, sentiment, and tags
 
 def create_emoji_map():
     # emoji_map[UNICODE] = {'name': NAME, 'tags': [TAG0, TAG1, TAG2...], 'sentiment': SENTIMENT}
